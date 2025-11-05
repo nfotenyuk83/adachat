@@ -56,8 +56,19 @@
                     }
                 }
 
-            } catch (e) { log("getInfo ERROR:", e.message); }
+            } catch (e) { console.log("getInfo ERROR:", e.message); }
         });
+    </script>
+    <script type="text/javascript">
+        function openChatWidget()
+        {
+            window.adaEmbed && typeof window.adaEmbed.toggle === "function" ? window.adaEmbed.toggle() : console.error("Ada Embed script loaded, but toggle function is not available")
+        }
+        function ensureAdaLoaded(a)
+        {
+            var b = setInterval(function () { window.adaEmbed && typeof window.adaEmbed.toggle === "function" && (clearInterval(b), a()) }, 100)
+        }
+        setTimeout(function () { ensureAdaLoaded(openChatWidget); 2E3 });
     </script>
 </body>
 </html>
