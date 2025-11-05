@@ -42,7 +42,7 @@
 
             try {
 
-                if (data.conversation_id) {
+                if (conversation_id) {
 
                     const url = `https://example.ada.support/api/v2/conversations/${conversation_id}/`;
                     const options = { method: 'GET'/*, headers: { Authorization: 'Bearer <token>' }*/ };
@@ -60,6 +60,7 @@
         });
     </script>
     <script type="text/javascript">
+
         function openChatWidget()
         {
             window.adaEmbed && typeof window.adaEmbed.toggle === "function" ? window.adaEmbed.toggle() : console.error("Ada Embed script loaded, but toggle function is not available")
@@ -69,6 +70,7 @@
             var b = setInterval(function () { window.adaEmbed && typeof window.adaEmbed.toggle === "function" && (clearInterval(b), a()) }, 100)
         }
         setTimeout(function () { ensureAdaLoaded(openChatWidget); 2E3 });
+
     </script>
 </body>
 </html>
