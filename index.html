@@ -11,9 +11,53 @@
             src="https://static.ada.support/embed2.js">
     </script>
 
+    <script>
+        var conversation_id = null;
+        window.adaSettings = {
+            onAdaEmbedLoaded: () => {
+                // Subscribe early so you don't miss the first event
+                window.adaEmbed.subscribeEvent("ada:conversation:message", (data) => {
+                    // data.conversation_id is the Ada conversation ID
+                    console.log("Conversation ID:", data.conversation_id);
+                    // optional: persist or send to your backend
+                    localStorage.setItem("ada_conversation_id", data.conversation_id);
+                    conversation_id = data.conversation_id;
+                });
+
+                //// (Optional) backup events that also carry the ID:
+                //window.adaEmbed.subscribeEvent("ada:agent:joined", (data) => {
+                //    console.log("Conversation ID:", data.conversation_id);
+                //});
+            }
+        };
+    </script>
+
 </head>
 <body>
-    <h1>ADA Chat Bot!</h1>
-    <p></p>
+    <h1>Ada Chat bot</h1>
+    <p><button id="getConversationInfo">Get a conversation info</button></p>
+
+    <script type="text/javascript">
+        document.getElementById("getConversationInfo").addEventListener("click", async () => {
+
+            try {
+
+                if (data.conversation_id) {
+
+                    const url = `https://example.ada.support/api/v2/conversations/${conversation_id}/`;
+                    const options = { method: 'GET'/*, headers: { Authorization: 'Bearer <token>' }*/ };
+                    try {
+                        const response = await fetch(url, options);
+                        const data = await response.json();
+                        console.log(data);
+                    } catch (error) {
+                        console.log(error);
+                        console.error(error);
+                    }
+                }
+
+            } catch (e) { log("getInfo ERROR:", e.message); }
+        });
+    </script>
 </body>
 </html>
