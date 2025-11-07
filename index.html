@@ -25,6 +25,31 @@
             button:hover {
                 background-color: #45a049;
             }
+
+        #timerDisplay {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .timer-active {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .timer-warning {
+            background-color: #fff3e0;
+            color: #e65100;
+        }
+
+        .timer-critical {
+            background-color: #ffebee;
+            color: #c62828;
+        }
     </style>
     <script id="__ada"
             data-handle="demo-sandbox-gen-inpixio"
@@ -33,17 +58,57 @@
     <script>
         let conversationId = null;
         let inactivityTimer = null;
+        let countdownInterval = null;
+        let timeRemaining = 10;
+
+        const timerDisplay = document.getElementById('timerDisplay');
+        const countdownElement = document.getElementById('countdown');
+        const statusElement = document.getElementById('status');
+
+        // Update countdown display
+        function updateCountdown() {
+            countdownElement.textContent = timeRemaining + 's';
+
+            // Change color based on time remaining
+            timerDisplay.classList.remove('timer-active', 'timer-warning', 'timer-critical');
+            if (timeRemaining > 5) {
+                timerDisplay.classList.add('timer-active');
+            } else if (timeRemaining > 2) {
+                timerDisplay.classList.add('timer-warning');
+            } else {
+                timerDisplay.classList.add('timer-critical');
+            }
+        }
 
         // Function to reset inactivity timer
         function resetInactivityTimer() {
-            // Clear existing timer
+            // Clear existing timers
             if (inactivityTimer) {
                 clearTimeout(inactivityTimer);
             }
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+
+            // Reset countdown
+            timeRemaining = 10;
+            updateCountdown();
+            statusElement.textContent = 'Timer active - waiting for inactivity...';
+
+            // Start countdown display
+            countdownInterval = setInterval(() => {
+                timeRemaining--;
+                updateCountdown();
+
+                if (timeRemaining <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
 
             // Set new timer for 10 seconds
             inactivityTimer = setTimeout(() => {
                 console.log("No activity for 10 seconds, triggering re-engagement");
+                statusElement.textContent = 'Triggering re-engagement...';
 
                 // Set meta field
                 window.adaEmbed.setMetaFields({
@@ -53,6 +118,8 @@
                 // Trigger answer after 3 seconds
                 setTimeout(() => {
                     window.adaEmbed.triggerAnswer("69025646b988f548609bca73");
+                    statusElement.textContent = 'Re-engagement triggered!';
+                    countdownElement.textContent = '0s';
                 }, 3000);
             }, 10000);
         }
@@ -85,6 +152,12 @@
         <button id="openChat">Open Chat</button>
     </p>
 
+    <div id="timerDisplay">
+        <div>Inactivity Timer</div>
+        <div id="countdown" style="font-size: 36px; margin-top: 10px;">--</div>
+        <div id="status" style="font-size: 14px; margin-top: 5px; font-weight: normal;">Waiting for activity...</div>
+    </div>
+
     <script>
         // Open chat button
         document.getElementById("openChat").addEventListener("click", () => {
@@ -97,8 +170,11 @@
 
         // Auto-open chat after delay
         function ensureAdaLoaded(callback) {
+            let adaLoaded = false;
+
             const checkInterval = setInterval(() => {
                 if (window.adaEmbed && typeof window.adaEmbed.toggle === "function") {
+                    adaLoaded = true;
                     clearInterval(checkInterval);
                     callback();
                 }
@@ -106,8 +182,10 @@
 
             // Timeout after 10 seconds
             setTimeout(() => {
-                clearInterval(checkInterval);
-                console.warn("Ada Embed did not load within timeout");
+                if (!adaLoaded) {
+                    clearInterval(checkInterval);
+                    console.warn("Ada Embed did not load within timeout");
+                }
             }, 10000);
         }
 
