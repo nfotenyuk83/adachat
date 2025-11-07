@@ -25,25 +25,6 @@
             button:hover {
                 background-color: #45a049;
             }
-
-        #conversationData {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-radius: 4px;
-            white-space: pre-wrap;
-            font-family: monospace;
-            max-height: 400px;
-            overflow-y: auto;
-        }
-
-        .warning {
-            background-color: #fff3cd;
-            border: 1px solid #ffc107;
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
     </style>
     <script id="__ada"
             data-handle="demo-sandbox-gen-inpixio"
@@ -53,6 +34,12 @@
         let conversationId = null;
 
         window.adaSettings = {
+            chatterTokenCallback: (callback) => {
+                // Generate or retrieve your chatter token
+                const chatterToken = "your-chatter-token-here";
+                console.log("Providing chatter token:", chatterToken);
+                callback(chatterToken);
+            },
             onAdaEmbedLoaded: () => {
                 console.log("Ada Embed loaded successfully");
 
@@ -78,57 +65,11 @@
 <body>
     <h1>Ada Chatbot Integration Demo</h1>
 
-    <div class="warning">
-        <strong>⚠️ Security Warning:</strong> API credentials should never be exposed in client-side code.
-        This demo needs a backend proxy to securely call the Ada API.
-    </div>
-
     <p>
-        <button id="getConversationInfo">Get Conversation Info</button>
-        <button id="openChat" style="margin-left: 10px;">Open Chat</button>
+        <button id="openChat">Open Chat</button>
     </p>
 
-    <div id="conversationData"></div>
-
     <script>
-        const displayArea = document.getElementById("conversationData");
-
-        // Get conversation info button
-        document.getElementById("getConversationInfo").addEventListener("click", async () => {
-            if (!conversationId) {
-                displayArea.textContent = "No conversation ID available. Please start a chat first.";
-                return;
-            }
-
-            displayArea.textContent = "Fetching conversation data...";
-
-            // NOTE: This API call will likely fail due to CORS and exposed credentials
-            // In production, you should proxy this through your backend
-            const url = `https://demo-sandbox-gen-inpixio.ada.support/api/v2/conversations/${conversationId}/`;
-            const options = {
-                method: 'GET',
-                headers: {
-                    // WARNING: Never expose API keys in frontend code!
-                    'Authorization': 'Bearer acebf7302d4b01d10e9ff9828fa491dc'
-                }
-            };
-
-            try {
-                const response = await fetch(url, options);
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-                }
-
-                const data = await response.json();
-                displayArea.textContent = JSON.stringify(data, null, 2);
-                console.log("Conversation data:", data);
-            } catch (error) {
-                displayArea.textContent = `Error: ${error.message}\n\nThis is likely due to CORS restrictions. You need a backend proxy to call the Ada API securely.`;
-                console.error("API Error:", error);
-            }
-        });
-
         // Open chat button
         document.getElementById("openChat").addEventListener("click", () => {
             if (window.adaEmbed && typeof window.adaEmbed.toggle === "function") {
