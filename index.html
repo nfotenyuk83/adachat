@@ -61,9 +61,16 @@
         let countdownInterval = null;
         let timeRemaining = 10;
 
-        const timerDisplay = document.getElementById('timerDisplay');
-        const countdownElement = document.getElementById('countdown');
-        const statusElement = document.getElementById('status');
+        let timerDisplay;
+        let countdownElement;
+        let statusElement;
+
+        // Initialize DOM elements after page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            timerDisplay = document.getElementById('timerDisplay');
+            countdownElement = document.getElementById('countdown');
+            statusElement = document.getElementById('status');
+        });
 
         // Update countdown display
         function updateCountdown() {
