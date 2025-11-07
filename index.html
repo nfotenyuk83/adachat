@@ -1,76 +1,166 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Page</title>
+    <title>Ada Chatbot Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
 
-    <!-- <head> -->
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+            button:hover {
+                background-color: #45a049;
+            }
+
+        #conversationData {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .warning {
+            background-color: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+    </style>
     <script id="__ada"
             data-handle="demo-sandbox-gen-inpixio"
             src="https://static.ada.support/embed2.js">
     </script>
-
     <script>
-        var conversation_id = null;
+        let conversationId = null;
+
         window.adaSettings = {
             onAdaEmbedLoaded: () => {
-                // Subscribe early so you don't miss the first event
+                console.log("Ada Embed loaded successfully");
+
+                // Subscribe to conversation messages
                 window.adaEmbed.subscribeEvent("ada:conversation:message", (data) => {
-                    // data.conversation_id is the Ada conversation ID
-                    console.log("Conversation ID:", data.conversation_id);
-                    // optional: persist or send to your backend
-                    localStorage.setItem("ada_conversation_id", data.conversation_id);
-                    conversation_id = data.conversation_id;
+                    conversationId = data.conversation_id;
+                    console.log("Conversation ID:", conversationId);
+                    localStorage.setItem("ada_conversation_id", conversationId);
                 });
 
-                //// (Optional) backup events that also carry the ID:
-                //window.adaEmbed.subscribeEvent("ada:agent:joined", (data) => {
-                //    console.log("Conversation ID:", data.conversation_id);
-                //});
+                // Subscribe to other useful events
+                window.adaEmbed.subscribeEvent("ada:agent:joined", (data) => {
+                    console.log("Agent joined conversation:", data.conversation_id);
+                });
+
+                window.adaEmbed.subscribeEvent("ada:conversation:ended", (data) => {
+                    console.log("Conversation ended:", data.conversation_id);
+                });
             }
         };
     </script>
-
 </head>
 <body>
-    <h1>Ada Chat bot</h1>
-    <p><button id="getConversationInfo">Get a conversation info</button></p>
+    <h1>Ada Chatbot Integration Demo</h1>
 
-    <script type="text/javascript">
+    <div class="warning">
+        <strong>⚠️ Security Warning:</strong> API credentials should never be exposed in client-side code.
+        This demo needs a backend proxy to securely call the Ada API.
+    </div>
+
+    <p>
+        <button id="getConversationInfo">Get Conversation Info</button>
+        <button id="openChat" style="margin-left: 10px;">Open Chat</button>
+    </p>
+
+    <div id="conversationData"></div>
+
+    <script>
+        const displayArea = document.getElementById("conversationData");
+
+        // Get conversation info button
         document.getElementById("getConversationInfo").addEventListener("click", async () => {
+            if (!conversationId) {
+                displayArea.textContent = "No conversation ID available. Please start a chat first.";
+                return;
+            }
+
+            displayArea.textContent = "Fetching conversation data...";
+
+            // NOTE: This API call will likely fail due to CORS and exposed credentials
+            // In production, you should proxy this through your backend
+            const url = `https://demo-sandbox-gen-inpixio.ada.support/api/v2/conversations/${conversationId}/`;
+            const options = {
+                method: 'GET',
+                headers: {
+                    // WARNING: Never expose API keys in frontend code!
+                    'Authorization': 'Bearer acebf7302d4b01d10e9ff9828fa491dc'
+                }
+            };
 
             try {
+                const response = await fetch(url, options);
 
-                if (conversation_id) {
-
-                    const url = `https://demo-sandbox-gen-inpixio.ada.support/api/v2/conversations/${conversation_id}/`;
-                    const options = { method: 'GET', headers: { Authorization: 'Bearer acebf7302d4b01d10e9ff9828fa491dc' }};
-                    try {
-                        const response = await fetch(url, options);
-                        const data = await response.json();
-                        console.log(data);
-                    } catch (error) {
-                        console.log(error);
-                        console.error(error);
-                    }
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
 
-            } catch (e) { console.log("getInfo ERROR:", e.message); }
+                const data = await response.json();
+                displayArea.textContent = JSON.stringify(data, null, 2);
+                console.log("Conversation data:", data);
+            } catch (error) {
+                displayArea.textContent = `Error: ${error.message}\n\nThis is likely due to CORS restrictions. You need a backend proxy to call the Ada API securely.`;
+                console.error("API Error:", error);
+            }
         });
-    </script>
-    <script type="text/javascript">
 
-        function openChatWidget()
-        {
-            window.adaEmbed && typeof window.adaEmbed.toggle === "function" ? window.adaEmbed.toggle() : console.error("Ada Embed script loaded, but toggle function is not available")
-        }
-        function ensureAdaLoaded(a)
-        {
-            var b = setInterval(function () { window.adaEmbed && typeof window.adaEmbed.toggle === "function" && (clearInterval(b), a()) }, 100)
-        }
-        setTimeout(function () { ensureAdaLoaded(openChatWidget); 2E3 });
+        // Open chat button
+        document.getElementById("openChat").addEventListener("click", () => {
+            if (window.adaEmbed && typeof window.adaEmbed.toggle === "function") {
+                window.adaEmbed.toggle();
+            } else {
+                console.error("Ada Embed not ready");
+            }
+        });
 
+        // Auto-open chat after delay
+        function ensureAdaLoaded(callback) {
+            const checkInterval = setInterval(() => {
+                if (window.adaEmbed && typeof window.adaEmbed.toggle === "function") {
+                    clearInterval(checkInterval);
+                    callback();
+                }
+            }, 100);
+
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                console.warn("Ada Embed did not load within timeout");
+            }, 10000);
+        }
+
+        // Auto-open chat after 2 seconds
+        setTimeout(() => {
+            ensureAdaLoaded(() => {
+                console.log("Auto-opening chat widget");
+                window.adaEmbed.toggle();
+            });
+        }, 2000);
     </script>
 </body>
 </html>
