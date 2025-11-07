@@ -32,13 +32,35 @@
     </script>
     <script>
         let conversationId = null;
+        let inactivityTimer = null;
+
+        // Function to reset inactivity timer
+        function resetInactivityTimer() {
+            // Clear existing timer
+            if (inactivityTimer) {
+                clearTimeout(inactivityTimer);
+            }
+
+            // Set new timer for 10 seconds
+            inactivityTimer = setTimeout(() => {
+                console.log("No activity for 10 seconds, triggering re-engagement");
+
+                // Set meta field
+                window.adaEmbed.setMetaFields({
+                    'engagement_stage': 'reengage1'
+                });
+
+                // Trigger answer after 3 seconds
+                setTimeout(() => {
+                    window.adaEmbed.triggerAnswer("69025646b988f548609bca73");
+                }, 3000);
+            }, 10000);
+        }
 
         window.adaSettings = {
             chatterTokenCallback: (chatterToken) => {
                 // Generate or retrieve your chatter token
-                //-chatter-token-here";
                 console.log("Providing chatter token:", chatterToken);
-                //callback(chatterToken);
             },
             onAdaEmbedLoaded: () => {
                 console.log("Ada Embed loaded successfully");
@@ -48,15 +70,9 @@
                     conversationId = data.conversation_id;
                     console.log("Conversation ID:", conversationId);
                     localStorage.setItem("ada_conversation_id", conversationId);
-                });
 
-                // Subscribe to other useful events
-                window.adaEmbed.subscribeEvent("ada:agent:joined", (data) => {
-                    console.log("Agent joined conversation:", data.conversation_id);
-                });
-
-                window.adaEmbed.subscribeEvent("ada:conversation:ended", (data) => {
-                    console.log("Conversation ended:", data.conversation_id);
+                    // Reset inactivity timer on each message
+                    resetInactivityTimer();
                 });
             }
         };
