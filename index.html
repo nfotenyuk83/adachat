@@ -67,6 +67,8 @@
 
         // Update countdown display
         function updateCountdown() {
+            if (!countdownElement || !timerDisplay) return;
+
             countdownElement.textContent = timeRemaining + 's';
 
             // Change color based on time remaining
@@ -93,7 +95,10 @@
             // Reset countdown
             timeRemaining = 10;
             updateCountdown();
-            statusElement.textContent = 'Timer active - waiting for inactivity...';
+
+            if (statusElement) {
+                statusElement.textContent = 'Timer active - waiting for inactivity...';
+            }
 
             // Start countdown display
             countdownInterval = setInterval(() => {
@@ -108,7 +113,10 @@
             // Set new timer for 10 seconds
             inactivityTimer = setTimeout(() => {
                 console.log("No activity for 10 seconds, triggering re-engagement");
-                statusElement.textContent = 'Triggering re-engagement...';
+
+                if (statusElement) {
+                    statusElement.textContent = 'Triggering re-engagement...';
+                }
 
                 // Set meta field
                 window.adaEmbed.setMetaFields({
@@ -118,8 +126,13 @@
                 // Trigger answer after 3 seconds
                 setTimeout(() => {
                     window.adaEmbed.triggerAnswer("69025646b988f548609bca73");
-                    statusElement.textContent = 'Re-engagement triggered!';
-                    countdownElement.textContent = '0s';
+
+                    if (statusElement) {
+                        statusElement.textContent = 'Re-engagement triggered!';
+                    }
+                    if (countdownElement) {
+                        countdownElement.textContent = '0s';
+                    }
                 }, 3000);
             }, 10000);
         }
