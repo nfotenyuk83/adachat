@@ -34,11 +34,11 @@
         let conversationId = null;
 
         window.adaSettings = {
-            chatterTokenCallback: (callback) => {
+            chatterTokenCallback: (chatterToken) => {
                 // Generate or retrieve your chatter token
-                const chatterToken = "your-chatter-token-here";
+                //-chatter-token-here";
                 console.log("Providing chatter token:", chatterToken);
-                callback(chatterToken);
+                //callback(chatterToken);
             },
             onAdaEmbedLoaded: () => {
                 console.log("Ada Embed loaded successfully");
