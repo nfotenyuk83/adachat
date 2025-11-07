@@ -128,6 +128,9 @@
             chatterTokenCallback: (chatterToken) => {
                 // Generate or retrieve your chatter token
                 console.log("Providing chatter token:", chatterToken);
+
+                // Reset inactivity timer when chatter token is provided
+                resetInactivityTimer();
             },
             onAdaEmbedLoaded: () => {
                 console.log("Ada Embed loaded successfully");
