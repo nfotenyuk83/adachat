@@ -119,8 +119,12 @@
                 }
 
                 // Open chat if it's minimized
-                if (window.adaEmbed && typeof window.adaEmbed.start === "function") {
-                    window.adaEmbed.start();
+                if (window.adaEmbed) {
+                    const isOpen = window.adaEmbed.isDrawerOpen && window.adaEmbed.isDrawerOpen();
+
+                    if (!isOpen && typeof window.adaEmbed.toggle === "function") {
+                        window.adaEmbed.toggle();
+                    }
                 }
 
                 // Set meta field
@@ -184,8 +188,15 @@
     <script>
         // Open chat button
         document.getElementById("openChat").addEventListener("click", () => {
-            if (window.adaEmbed && typeof window.adaEmbed.start === "function") {
-                window.adaEmbed.start();
+            if (window.adaEmbed) {
+                // Check if chat is already open
+                const isOpen = window.adaEmbed.isDrawerOpen && window.adaEmbed.isDrawerOpen();
+
+                if (!isOpen && typeof window.adaEmbed.toggle === "function") {
+                    window.adaEmbed.toggle();
+                } else {
+                    console.log("Chat is already open");
+                }
             } else {
                 console.error("Ada Embed not ready");
             }
