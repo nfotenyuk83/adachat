@@ -118,6 +118,11 @@
                     statusElement.textContent = 'Triggering re-engagement...';
                 }
 
+                // Open chat if it's minimized
+                if (window.adaEmbed && typeof window.adaEmbed.start === "function") {
+                    window.adaEmbed.start();
+                }
+
                 // Set meta field
                 window.adaEmbed.setMetaFields({
                     'engagement_stage': 'reengage1'
@@ -179,8 +184,8 @@
     <script>
         // Open chat button
         document.getElementById("openChat").addEventListener("click", () => {
-            if (window.adaEmbed && typeof window.adaEmbed.toggle === "function") {
-                window.adaEmbed.toggle();
+            if (window.adaEmbed && typeof window.adaEmbed.start === "function") {
+                window.adaEmbed.start();
             } else {
                 console.error("Ada Embed not ready");
             }
@@ -230,11 +235,11 @@
             }, 10000);
         }
 
-        // Auto-open chat after 2 seconds
+        // Auto-open chat after delay
         setTimeout(() => {
             ensureAdaLoaded(() => {
                 console.log("Auto-opening chat widget");
-                window.adaEmbed.toggle();
+                window.adaEmbed.start();
             });
         }, 2000);
     </script>
