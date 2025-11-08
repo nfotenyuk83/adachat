@@ -65,6 +65,27 @@
         let countdownElement;
         let statusElement;
 
+        // Function to ensure chat drawer is open
+        function ensureChatOpen() {
+            return new Promise((resolve, reject) => {
+                if (window.adaEmbed && typeof window.adaEmbed.getInfo === "function") {
+                    window.adaEmbed.getInfo().then(function (windowInfo) {
+                        console.log("Is the drawer open?", windowInfo.isDrawerOpen ? "Yes" : "No");
+
+                        if (!windowInfo.isDrawerOpen && typeof window.adaEmbed.toggle === "function") {
+                            window.adaEmbed.toggle();
+                        }
+                        resolve(windowInfo);
+                    }).catch(function (error) {
+                        console.error("Error checking chat status:", error);
+                        reject(error);
+                    });
+                } else {
+                    reject(new Error("Ada Embed not ready"));
+                }
+            });
+        }
+
         // Update countdown display
         function updateCountdown() {
             if (!countdownElement || !timerDisplay) return;
@@ -118,31 +139,27 @@
                     statusElement.textContent = 'Triggering re-engagement...';
                 }
 
-                // Open chat if it's minimized
-                if (window.adaEmbed) {
-                    const isOpen = window.adaEmbed.isDrawerOpen && window.adaEmbed.isDrawerOpen();
+                // Ensure chat is open before triggering re-engagement
+                ensureChatOpen().then(function (windowInfo) {
+                    // Set meta field after ensuring chat is open
+                    window.adaEmbed.setMetaFields({
+                        'engagement_stage': 'reengage1'
+                    });
 
-                    if (!isOpen && typeof window.adaEmbed.toggle === "function") {
-                        window.adaEmbed.toggle();
-                    }
-                }
+                    // Trigger answer after 0.5 seconds
+                    setTimeout(() => {
+                        window.adaEmbed.triggerAnswer("69025646b988f548609bca73");
 
-                // Set meta field
-                window.adaEmbed.setMetaFields({
-                    'engagement_stage': 'reengage1'
+                        if (statusElement) {
+                            statusElement.textContent = 'Re-engagement triggered!';
+                        }
+                        if (countdownElement) {
+                            countdownElement.textContent = '0s';
+                        }
+                    }, 500);
+                }).catch(function (error) {
+                    console.error("Error during re-engagement:", error);
                 });
-
-                // Trigger answer after 0.5 seconds
-                setTimeout(() => {
-                    window.adaEmbed.triggerAnswer("69025646b988f548609bca73");
-
-                    if (statusElement) {
-                        statusElement.textContent = 'Re-engagement triggered!';
-                    }
-                    if (countdownElement) {
-                        countdownElement.textContent = '0s';
-                    }
-                }, 500);
             }, 10000);
         }
 
@@ -188,18 +205,13 @@
     <script>
         // Open chat button
         document.getElementById("openChat").addEventListener("click", () => {
-            if (window.adaEmbed) {
-                // Check if chat is already open
-                const isOpen = window.adaEmbed.isDrawerOpen && window.adaEmbed.isDrawerOpen();
-
-                if (!isOpen && typeof window.adaEmbed.toggle === "function") {
-                    window.adaEmbed.toggle();
-                } else {
+            ensureChatOpen().then(function (windowInfo) {
+                if (windowInfo.isDrawerOpen) {
                     console.log("Chat is already open");
                 }
-            } else {
-                console.error("Ada Embed not ready");
-            }
+            }).catch(function (error) {
+                console.error("Error opening chat:", error);
+            });
         });
 
         // Reset timer button
