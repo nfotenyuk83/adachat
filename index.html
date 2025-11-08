@@ -167,6 +167,7 @@
     <p>
         <button id="openChat">Open Chat</button>
         <button id="resetTimer" style="margin-left: 10px; background-color: #ff9800;">Reset Timer</button>
+        <button id="resetChat" style="margin-left: 10px; background-color: #f44336;">Reset Chat</button>
     </p>
 
     <div id="timerDisplay">
@@ -189,6 +190,23 @@
         document.getElementById("resetTimer").addEventListener("click", () => {
             console.log("Manual timer reset");
             resetInactivityTimer();
+        });
+
+        // Reset chat button
+        document.getElementById("resetChat").addEventListener("click", () => {
+            if (window.adaEmbed && typeof window.adaEmbed.reset === "function") {
+                console.log("Resetting Ada chat");
+                window.adaEmbed.reset();
+
+                // Clear conversation ID
+                conversationId = null;
+                localStorage.removeItem("ada_conversation_id");
+
+                // Reset timer as well
+                resetInactivityTimer();
+            } else {
+                console.error("Ada Embed reset function not available");
+            }
         });
 
         // Auto-open chat after delay
