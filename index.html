@@ -166,6 +166,7 @@
 
     <p>
         <button id="openChat">Open Chat</button>
+        <button id="resetTimer" style="margin-left: 10px; background-color: #ff9800;">Reset Timer</button>
     </p>
 
     <div id="timerDisplay">
@@ -182,6 +183,12 @@
             } else {
                 console.error("Ada Embed not ready");
             }
+        });
+
+        // Reset timer button
+        document.getElementById("resetTimer").addEventListener("click", () => {
+            console.log("Manual timer reset");
+            resetInactivityTimer();
         });
 
         // Auto-open chat after delay
