@@ -150,6 +150,11 @@
                     setTimeout(() => {
                         window.adaEmbed.triggerAnswer("69025646b988f548609bca73");
 
+                        // Update engagement_stage after triggering answer
+                        window.adaEmbed.setMetaFields({
+                            'engagement_stage': 'reengage1_inside'
+                        });
+
                         if (statusElement) {
                             statusElement.textContent = 'Re-engagement triggered!';
                         }
