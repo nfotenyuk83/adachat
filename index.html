@@ -156,14 +156,6 @@
                         if (countdownElement) {
                             countdownElement.textContent = '0s';
                         }
-
-                        // Update engagement_stage after 10 seconds
-                        setTimeout(() => {
-                            window.adaEmbed.setMetaFields({
-                                'engagement_stage': 'reengage1_inside'
-                            });
-                            console.log("Updated engagement_stage to reengage1_inside");
-                        }, 10000);
                     }, 500);
                 }).catch(function (error) {
                     console.error("Error during re-engagement:", error);
