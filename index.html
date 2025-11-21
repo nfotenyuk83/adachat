@@ -50,6 +50,72 @@
             background-color: #ffebee;
             color: #c62828;
         }
+
+        #customPopup {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 400px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            padding: 20px;
+            z-index: 10000;
+            font-family: Arial, sans-serif;
+        }
+
+            #customPopup.show {
+                display: block;
+                animation: slideUp 0.3s ease-out;
+            }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        #customPopup h3 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .popup-button {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            font-size: 14px;
+            text-align: left;
+            transition: background 0.2s;
+        }
+
+            .popup-button:hover {
+                background: #f5f5f5;
+            }
+
+            .popup-button.skip {
+                text-align: center;
+                color: #666;
+                border: none;
+                margin-top: 10px;
+            }
+
+                .popup-button.skip:hover {
+                    background: #f0f0f0;
+                }
     </style>
     <script id="__ada"
             data-handle="demo-sandbox-gen-inpixio"
@@ -64,6 +130,21 @@
         let timerDisplay;
         let countdownElement;
         let statusElement;
+        let customPopup;
+
+        // Function to show custom popup
+        function showCustomPopup() {
+            if (customPopup) {
+                customPopup.classList.add('show');
+            }
+        }
+
+        // Function to hide custom popup
+        function hideCustomPopup() {
+            if (customPopup) {
+                customPopup.classList.remove('show');
+            }
+        }
 
         // Function to ensure chat drawer is open
         function ensureChatOpen() {
@@ -156,6 +237,11 @@
                         if (countdownElement) {
                             countdownElement.textContent = '0s';
                         }
+
+                        // Show custom popup after triggering answer
+                        setTimeout(() => {
+                            showCustomPopup();
+                        }, 1000);
                     }, 500);
                 }).catch(function (error) {
                     console.error("Error during re-engagement:", error);
@@ -202,6 +288,13 @@
         <div id="status" style="font-size: 14px; margin-top: 5px; font-weight: normal;">Waiting for activity...</div>
     </div>
 
+    <div id="customPopup">
+        <h3>Please choose:</h3>
+        <button class="popup-button" id="needHelp">Yes, I need help</button>
+        <button class="popup-button" id="foundAnswer">No, I found my answer</button>
+        <button class="popup-button skip" id="skipPopup">Skip</button>
+    </div>
+
     <script>
         // Open chat button
         document.getElementById("openChat").addEventListener("click", () => {
@@ -232,9 +325,30 @@
 
                 // Reset timer as well
                 resetInactivityTimer();
+
+                // Hide popup
+                hideCustomPopup();
             } else {
                 console.error("Ada Embed reset function not available");
             }
+        });
+
+        // Popup button handlers
+        document.getElementById("needHelp").addEventListener("click", () => {
+            console.log("User needs help");
+            hideCustomPopup();
+            // You can add additional logic here, like triggering another Ada answer
+        });
+
+        document.getElementById("foundAnswer").addEventListener("click", () => {
+            console.log("User found their answer");
+            hideCustomPopup();
+            // You can add additional logic here
+        });
+
+        document.getElementById("skipPopup").addEventListener("click", () => {
+            console.log("User skipped popup");
+            hideCustomPopup();
         });
 
         // Auto-open chat after delay
@@ -272,6 +386,7 @@
         timerDisplay = document.getElementById('timerDisplay');
         countdownElement = document.getElementById('countdown');
         statusElement = document.getElementById('status');
+        customPopup = document.getElementById('customPopup');
     </script>
 </body>
 </html>
