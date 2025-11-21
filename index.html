@@ -226,13 +226,15 @@
                 // Ensure chat is open before triggering re-engagement
                 ensureChatOpen().then(function (windowInfo) {
                     // Set meta field after ensuring chat is open
-                    window.adaEmbed.setMetaFields({
-                        'engagement_stage': 'reengage1'
-                    });
+                    // This marks the engagement stage as 'reengage1' for tracking
+                    // window.adaEmbed.setMetaFields({
+                    //     'engagement_stage': 'reengage1'
+                    // });
 
                     // Trigger answer after 0.5 seconds
                     setTimeout(() => {
-                        window.adaEmbed.triggerAnswer("69025646b988f548609bca73");
+                        // Trigger the specific re-engagement answer by its ID
+                        // window.adaEmbed.triggerAnswer("69025646b988f548609bca73");
 
                         if (statusElement) {
                             statusElement.textContent = 'Re-engagement triggered!';
