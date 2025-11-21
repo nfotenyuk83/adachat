@@ -274,6 +274,15 @@
                     // Reset inactivity timer on each message
                     resetInactivityTimer();
                 });
+
+                // Subscribe to drawer toggle events to hide popup when chat is minimized
+                window.adaEmbed.subscribeEvent("ada:drawer_toggle", (data) => {
+                    console.log("Drawer toggled:", data);
+                    // If drawer is closed, hide the popup
+                    if (data && !data.isDrawerOpen) {
+                        hideCustomPopup();
+                    }
+                });
             }
         };
     </script>
@@ -342,7 +351,12 @@
         document.getElementById("needHelp").addEventListener("click", () => {
             console.log("User needs help");
             hideCustomPopup();
-            // You can add additional logic here, like triggering another Ada answer
+            // Open chat if it's closed
+            ensureChatOpen().then(function (windowInfo) {
+                console.log("Chat opened for user who needs help");
+            }).catch(function (error) {
+                console.error("Error opening chat:", error);
+            });
         });
 
         document.getElementById("foundAnswer").addEventListener("click", () => {
