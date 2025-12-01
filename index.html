@@ -244,15 +244,11 @@
                         statusElement.textContent = 'First re-engagement triggered!';
                     }
 
-                    // Ensure chat is open before showing popup
-                    ensureChatOpen().then(function (windowInfo) {
-                        // Show custom popup
-                        setTimeout(() => {
-                            showCustomPopup();
-                        }, 500);
-                    }).catch(function (error) {
-                        console.error("Error during first re-engagement:", error);
-                    });
+                    // Show popup without checking drawer state
+                    // Popup appears whether drawer is open or closed
+                    setTimeout(() => {
+                        showCustomPopup();
+                    }, 500);
 
                     // Start timer for second popup (1 minute = 60 seconds)
                     // This runs regardless of user interaction after first popup
@@ -287,15 +283,11 @@
                                 countdownElement.textContent = '0s';
                             }
 
-                            // Ensure chat is open before showing popup
-                            ensureChatOpen().then(function (windowInfo) {
-                                // Show custom popup again
-                                setTimeout(() => {
-                                    showCustomPopup();
-                                }, 500);
-                            }).catch(function (error) {
-                                console.error("Error during second re-engagement:", error);
-                            });
+                            // Show popup without checking drawer state
+                            // Popup appears whether drawer is open or closed
+                            setTimeout(() => {
+                                showCustomPopup();
+                            }, 500);
                         }, 60000); // 60 seconds
                     }
                 }, 18000); // 18 seconds
@@ -319,17 +311,21 @@
                     console.log("Conversation ID:", conversationId);
                     localStorage.setItem("ada_conversation_id", conversationId);
 
+                    // If popup is visible and user interacts with chat, auto-dismiss popup
+                    if (customPopup && customPopup.classList.contains('show')) {
+                        console.log("User interacted with chat, auto-dismissing popup");
+                        hideCustomPopup();
+                    }
+
                     // Reset inactivity timer on each message
                     resetInactivityTimer();
                 });
 
-                // Subscribe to drawer toggle events to hide popup when chat is minimized
+                // Subscribe to drawer toggle events
                 window.adaEmbed.subscribeEvent("ada:drawer_toggle", (data) => {
                     console.log("Drawer toggled:", data);
-                    // If drawer is closed, hide the popup
-                    if (data && !data.isDrawerOpen) {
-                        hideCustomPopup();
-                    }
+                    // Don't automatically hide popup when drawer is minimized
+                    // Popup should stay open until user makes a choice
                 });
             }
         };
@@ -413,17 +409,20 @@
         // Popup button handlers
         document.getElementById("needHelp").addEventListener("click", () => {
             console.log("User clicked: Start now");
-            hideCustomPopup();
-            // Open chat if it's closed
+
+            // Open drawer and close popup
             ensureChatOpen().then(function (windowInfo) {
-                console.log("Chat opened for user who needs help");
+                console.log("Chat opened - drawer is now open");
+                hideCustomPopup();
             }).catch(function (error) {
                 console.error("Error opening chat:", error);
+                hideCustomPopup();
             });
         });
 
         document.getElementById("foundAnswer").addEventListener("click", () => {
             console.log("User clicked: No thanks");
+            // Close popup without opening drawer
             hideCustomPopup();
         });
 
