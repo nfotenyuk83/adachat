@@ -84,8 +84,14 @@
 
         #customPopup h3 {
             margin: 0 0 15px 0;
-            font-size: 18px;
+            font-size: 16px;
             color: #333;
+            font-weight: normal;
+        }
+
+        #customPopup .emoji {
+            font-size: 20px;
+            margin-right: 8px;
         }
 
         .popup-button {
@@ -93,31 +99,33 @@
             width: 100%;
             padding: 12px;
             margin: 8px 0;
-            border: 1px solid #ddd;
+            border: 2px solid #4CAF50;
             border-radius: 6px;
-            background: white;
-            color: #333;
+            background: #4CAF50;
+            color: white;
             cursor: pointer;
             font-size: 14px;
-            text-align: left;
-            transition: background 0.2s;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.2s;
         }
 
             .popup-button:hover {
-                background: #f5f5f5;
-                color: #333;
+                background: #45a049;
+                border-color: #45a049;
             }
 
-            .popup-button.skip {
-                text-align: center;
-                color: #666;
+            .popup-button.secondary {
+                background: white;
+                color: #999;
                 border: none;
-                margin-top: 10px;
+                font-weight: normal;
+                padding: 10px;
             }
 
-                .popup-button.skip:hover {
-                    background: #f0f0f0;
-                    color: #666;
+                .popup-button.secondary:hover {
+                    background: #f5f5f5;
+                    color: #999;
                 }
     </style>
     <script id="__ada"
@@ -343,10 +351,9 @@
     </div>
 
     <div id="customPopup">
-        <h3>Are you still there? If you need more time, just let me know!</h3>
-        <button class="popup-button" id="needHelp">Yes, I need help</button>
-        <button class="popup-button" id="foundAnswer">No, I found my answer</button>
-        <button class="popup-button skip" id="skipPopup">Skip</button>
+        <h3><span class="emoji">👋</span>Still there? Your free PC check-up is waiting!</h3>
+        <button class="popup-button" id="needHelp">Start now</button>
+        <button class="popup-button secondary" id="foundAnswer">No thanks</button>
     </div>
 
     <script>
@@ -405,7 +412,7 @@
 
         // Popup button handlers
         document.getElementById("needHelp").addEventListener("click", () => {
-            console.log("User needs help");
+            console.log("User clicked: Start now");
             hideCustomPopup();
             // Open chat if it's closed
             ensureChatOpen().then(function (windowInfo) {
@@ -416,13 +423,7 @@
         });
 
         document.getElementById("foundAnswer").addEventListener("click", () => {
-            console.log("User found their answer");
-            hideCustomPopup();
-            // You can add additional logic here
-        });
-
-        document.getElementById("skipPopup").addEventListener("click", () => {
-            console.log("User skipped popup");
+            console.log("User clicked: No thanks");
             hideCustomPopup();
         });
 
