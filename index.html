@@ -127,8 +127,11 @@
     <script>
         let conversationId = null;
         let inactivityTimer = null;
+        let secondInactivityTimer = null;
         let countdownInterval = null;
-        let timeRemaining = 10;
+        let timeRemaining = 18;
+        let firstPopupShown = false;
+        let secondPopupShown = false;
 
         let timerDisplay;
         let countdownElement;
@@ -178,9 +181,9 @@
 
             // Change color based on time remaining
             timerDisplay.classList.remove('timer-active', 'timer-warning', 'timer-critical');
-            if (timeRemaining > 5) {
+            if (timeRemaining > 10) {
                 timerDisplay.classList.add('timer-active');
-            } else if (timeRemaining > 2) {
+            } else if (timeRemaining > 5) {
                 timerDisplay.classList.add('timer-warning');
             } else {
                 timerDisplay.classList.add('timer-critical');
@@ -189,6 +192,11 @@
 
         // Function to reset inactivity timer
         function resetInactivityTimer() {
+            // Only reset if popups haven't been shown yet
+            if (firstPopupShown && secondPopupShown) {
+                return; // Both popups shown, don't reset
+            }
+
             // Clear existing timers
             if (inactivityTimer) {
                 clearTimeout(inactivityTimer);
@@ -197,61 +205,93 @@
                 clearInterval(countdownInterval);
             }
 
-            // Reset countdown
-            timeRemaining = 10;
-            updateCountdown();
-
-            if (statusElement) {
-                statusElement.textContent = 'Timer active - waiting for inactivity...';
-            }
-
-            // Start countdown display
-            countdownInterval = setInterval(() => {
-                timeRemaining--;
+            // Don't reset the second timer once first popup is shown
+            if (!firstPopupShown) {
+                // Reset countdown for first popup (18 seconds)
+                timeRemaining = 18;
                 updateCountdown();
 
-                if (timeRemaining <= 0) {
-                    clearInterval(countdownInterval);
-                }
-            }, 1000);
-
-            // Set new timer for 10 seconds
-            inactivityTimer = setTimeout(() => {
-                console.log("No activity for 10 seconds, triggering re-engagement");
-
                 if (statusElement) {
-                    statusElement.textContent = 'Triggering re-engagement...';
+                    statusElement.textContent = 'Timer active - waiting for first popup...';
                 }
 
-                // Ensure chat is open before triggering re-engagement
-                ensureChatOpen().then(function (windowInfo) {
-                    // Set meta field after ensuring chat is open
-                    // This marks the engagement stage as 'reengage1' for tracking
-                    // window.adaEmbed.setMetaFields({
-                    //     'engagement_stage': 'reengage1'
-                    // });
+                // Start countdown display
+                countdownInterval = setInterval(() => {
+                    timeRemaining--;
+                    updateCountdown();
 
-                    // Trigger answer after 0.5 seconds
-                    setTimeout(() => {
-                        // Trigger the specific re-engagement answer by its ID
-                        // window.adaEmbed.triggerAnswer("69025646b988f548609bca73");
+                    if (timeRemaining <= 0) {
+                        clearInterval(countdownInterval);
+                    }
+                }, 1000);
 
-                        if (statusElement) {
-                            statusElement.textContent = 'Re-engagement triggered!';
-                        }
-                        if (countdownElement) {
-                            countdownElement.textContent = '0s';
-                        }
+                // Set timer for first popup (18 seconds)
+                inactivityTimer = setTimeout(() => {
+                    if (firstPopupShown) return; // Already shown
 
-                        // Show custom popup after triggering answer
+                    console.log("No activity for 18 seconds, triggering first re-engagement");
+                    firstPopupShown = true;
+
+                    if (statusElement) {
+                        statusElement.textContent = 'First re-engagement triggered!';
+                    }
+
+                    // Ensure chat is open before showing popup
+                    ensureChatOpen().then(function (windowInfo) {
+                        // Show custom popup
                         setTimeout(() => {
                             showCustomPopup();
+                        }, 500);
+                    }).catch(function (error) {
+                        console.error("Error during first re-engagement:", error);
+                    });
+
+                    // Start timer for second popup (1 minute = 60 seconds)
+                    // This runs regardless of user interaction after first popup
+                    if (!secondPopupShown) {
+                        timeRemaining = 60;
+                        updateCountdown();
+
+                        if (statusElement) {
+                            statusElement.textContent = 'Waiting for second popup (60s)...';
+                        }
+
+                        // Start countdown for second popup
+                        countdownInterval = setInterval(() => {
+                            timeRemaining--;
+                            updateCountdown();
+
+                            if (timeRemaining <= 0) {
+                                clearInterval(countdownInterval);
+                            }
                         }, 1000);
-                    }, 500);
-                }).catch(function (error) {
-                    console.error("Error during re-engagement:", error);
-                });
-            }, 10000);
+
+                        secondInactivityTimer = setTimeout(() => {
+                            if (secondPopupShown) return; // Already shown
+
+                            console.log("1 minute passed, triggering second re-engagement");
+                            secondPopupShown = true;
+
+                            if (statusElement) {
+                                statusElement.textContent = 'Second re-engagement triggered!';
+                            }
+                            if (countdownElement) {
+                                countdownElement.textContent = '0s';
+                            }
+
+                            // Ensure chat is open before showing popup
+                            ensureChatOpen().then(function (windowInfo) {
+                                // Show custom popup again
+                                setTimeout(() => {
+                                    showCustomPopup();
+                                }, 500);
+                            }).catch(function (error) {
+                                console.error("Error during second re-engagement:", error);
+                            });
+                        }, 60000); // 60 seconds
+                    }
+                }, 18000); // 18 seconds
+            }
         }
 
         window.adaSettings = {
@@ -324,6 +364,13 @@
         // Reset timer button
         document.getElementById("resetTimer").addEventListener("click", () => {
             console.log("Manual timer reset");
+            // Reset all popup flags
+            firstPopupShown = false;
+            secondPopupShown = false;
+            // Clear second timer if exists
+            if (secondInactivityTimer) {
+                clearTimeout(secondInactivityTimer);
+            }
             resetInactivityTimer();
         });
 
@@ -336,6 +383,15 @@
                 // Clear conversation ID
                 conversationId = null;
                 localStorage.removeItem("ada_conversation_id");
+
+                // Reset all popup flags
+                firstPopupShown = false;
+                secondPopupShown = false;
+
+                // Clear second timer if exists
+                if (secondInactivityTimer) {
+                    clearTimeout(secondInactivityTimer);
+                }
 
                 // Reset timer as well
                 resetInactivityTimer();
