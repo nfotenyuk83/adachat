@@ -202,7 +202,23 @@
         function resetInactivityTimer() {
             // Only reset if popups haven't been shown yet
             if (firstPopupShown && secondPopupShown) {
-                return; // Both popups shown, don't reset
+                // Both popups shown, just update UI to show completion
+                if (statusElement) {
+                    statusElement.textContent = 'All re-engagement popups completed';
+                }
+                if (countdownElement) {
+                    countdownElement.textContent = 'Done';
+                }
+                return;
+            }
+
+            // If first popup shown, just update the UI for second timer but don't reset it
+            if (firstPopupShown && !secondPopupShown) {
+                // Don't reset the second timer, but update UI to show it's running
+                if (statusElement) {
+                    statusElement.textContent = 'Second popup timer running (not resettable)...';
+                }
+                return;
             }
 
             // Clear existing timers
@@ -213,85 +229,82 @@
                 clearInterval(countdownInterval);
             }
 
-            // Don't reset the second timer once first popup is shown
-            if (!firstPopupShown) {
-                // Reset countdown for first popup (18 seconds)
-                timeRemaining = 18;
+            // Reset countdown for first popup (18 seconds)
+            timeRemaining = 18;
+            updateCountdown();
+
+            if (statusElement) {
+                statusElement.textContent = 'Timer active - waiting for first popup...';
+            }
+
+            // Start countdown display
+            countdownInterval = setInterval(() => {
+                timeRemaining--;
                 updateCountdown();
 
+                if (timeRemaining <= 0) {
+                    clearInterval(countdownInterval);
+                }
+            }, 1000);
+
+            // Set timer for first popup (18 seconds)
+            inactivityTimer = setTimeout(() => {
+                if (firstPopupShown) return; // Already shown
+
+                console.log("No activity for 18 seconds, triggering first re-engagement");
+                firstPopupShown = true;
+
                 if (statusElement) {
-                    statusElement.textContent = 'Timer active - waiting for first popup...';
+                    statusElement.textContent = 'First re-engagement triggered!';
                 }
 
-                // Start countdown display
-                countdownInterval = setInterval(() => {
-                    timeRemaining--;
+                // Show popup without checking drawer state
+                // Popup appears whether drawer is open or closed
+                setTimeout(() => {
+                    showCustomPopup();
+                }, 500);
+
+                // Start timer for second popup (1 minute = 60 seconds)
+                // This runs regardless of user interaction after first popup
+                if (!secondPopupShown) {
+                    timeRemaining = 60;
                     updateCountdown();
 
-                    if (timeRemaining <= 0) {
-                        clearInterval(countdownInterval);
-                    }
-                }, 1000);
-
-                // Set timer for first popup (18 seconds)
-                inactivityTimer = setTimeout(() => {
-                    if (firstPopupShown) return; // Already shown
-
-                    console.log("No activity for 18 seconds, triggering first re-engagement");
-                    firstPopupShown = true;
-
                     if (statusElement) {
-                        statusElement.textContent = 'First re-engagement triggered!';
+                        statusElement.textContent = 'Waiting for second popup (60s)...';
                     }
 
-                    // Show popup without checking drawer state
-                    // Popup appears whether drawer is open or closed
-                    setTimeout(() => {
-                        showCustomPopup();
-                    }, 500);
-
-                    // Start timer for second popup (1 minute = 60 seconds)
-                    // This runs regardless of user interaction after first popup
-                    if (!secondPopupShown) {
-                        timeRemaining = 60;
+                    // Start countdown for second popup
+                    countdownInterval = setInterval(() => {
+                        timeRemaining--;
                         updateCountdown();
 
+                        if (timeRemaining <= 0) {
+                            clearInterval(countdownInterval);
+                        }
+                    }, 1000);
+
+                    secondInactivityTimer = setTimeout(() => {
+                        if (secondPopupShown) return; // Already shown
+
+                        console.log("1 minute passed, triggering second re-engagement");
+                        secondPopupShown = true;
+
                         if (statusElement) {
-                            statusElement.textContent = 'Waiting for second popup (60s)...';
+                            statusElement.textContent = 'Second re-engagement triggered!';
+                        }
+                        if (countdownElement) {
+                            countdownElement.textContent = '0s';
                         }
 
-                        // Start countdown for second popup
-                        countdownInterval = setInterval(() => {
-                            timeRemaining--;
-                            updateCountdown();
-
-                            if (timeRemaining <= 0) {
-                                clearInterval(countdownInterval);
-                            }
-                        }, 1000);
-
-                        secondInactivityTimer = setTimeout(() => {
-                            if (secondPopupShown) return; // Already shown
-
-                            console.log("1 minute passed, triggering second re-engagement");
-                            secondPopupShown = true;
-
-                            if (statusElement) {
-                                statusElement.textContent = 'Second re-engagement triggered!';
-                            }
-                            if (countdownElement) {
-                                countdownElement.textContent = '0s';
-                            }
-
-                            // Show popup without checking drawer state
-                            // Popup appears whether drawer is open or closed
-                            setTimeout(() => {
-                                showCustomPopup();
-                            }, 500);
-                        }, 60000); // 60 seconds
-                    }
-                }, 18000); // 18 seconds
-            }
+                        // Show popup without checking drawer state
+                        // Popup appears whether drawer is open or closed
+                        setTimeout(() => {
+                            showCustomPopup();
+                        }, 500);
+                    }, 60000); // 60 seconds
+                }
+            }, 18000); // 18 seconds
         }
 
         window.adaSettings = {
