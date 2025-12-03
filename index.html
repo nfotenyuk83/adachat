@@ -200,7 +200,7 @@
 
         // Function to reset inactivity timer
         function resetInactivityTimer() {
-            // Only reset if popups haven't been shown yet
+            // Only stop if both popups have been shown
             if (firstPopupShown && secondPopupShown) {
                 // Both popups shown, just update UI to show completion
                 if (statusElement) {
@@ -212,24 +212,60 @@
                 return;
             }
 
-            // If first popup shown, just update the UI for second timer but don't reset it
-            if (firstPopupShown && !secondPopupShown) {
-                // Don't reset the second timer, but update UI to show it's running
-                if (statusElement) {
-                    statusElement.textContent = 'Second popup timer running (not resettable)...';
-                }
-                return;
-            }
-
             // Clear existing timers
             if (inactivityTimer) {
                 clearTimeout(inactivityTimer);
+            }
+            if (secondInactivityTimer) {
+                clearTimeout(secondInactivityTimer);
             }
             if (countdownInterval) {
                 clearInterval(countdownInterval);
             }
 
-            // Reset countdown for first popup (18 seconds)
+            // If first popup already shown, reset for second popup
+            if (firstPopupShown && !secondPopupShown) {
+                // Reset countdown for second popup (60 seconds)
+                timeRemaining = 60;
+                updateCountdown();
+
+                if (statusElement) {
+                    statusElement.textContent = 'Second popup timer reset - waiting 60s...';
+                }
+
+                // Start countdown display for second popup
+                countdownInterval = setInterval(() => {
+                    timeRemaining--;
+                    updateCountdown();
+
+                    if (timeRemaining <= 0) {
+                        clearInterval(countdownInterval);
+                    }
+                }, 1000);
+
+                // Set timer for second popup
+                secondInactivityTimer = setTimeout(() => {
+                    if (secondPopupShown) return;
+
+                    console.log("1 minute passed, triggering second re-engagement");
+                    secondPopupShown = true;
+
+                    if (statusElement) {
+                        statusElement.textContent = 'Second re-engagement triggered!';
+                    }
+                    if (countdownElement) {
+                        countdownElement.textContent = '0s';
+                    }
+
+                    setTimeout(() => {
+                        showCustomPopup();
+                    }, 500);
+                }, 60000);
+
+                return;
+            }
+
+            // First popup not shown yet, reset for first popup
             timeRemaining = 18;
             updateCountdown();
 
@@ -422,6 +458,9 @@
         // Popup button handlers
         document.getElementById("needHelp").addEventListener("click", () => {
             console.log("User clicked: Start now");
+
+            // Reset timer when user clicks "Start now"
+            resetInactivityTimer();
 
             // Open drawer and close popup
             ensureChatOpen().then(function (windowInfo) {
