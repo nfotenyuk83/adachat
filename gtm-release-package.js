@@ -12,6 +12,8 @@
         firstPopupDelay: 18000,  // 18 seconds
         secondPopupDelay: 60000, // 60 seconds
         popupShowDelay: 500,     // Delay before showing popup
+        autoOpenDelay: 2000,     // Delay before auto-opening chat (2 seconds)
+        adaLoadTimeout: 10000,   // Timeout for Ada to load (10 seconds)
         zIndex: 100000           // Z-index for popup
     };
 
@@ -209,6 +211,37 @@
         });
     }
 
+    // Ensure Ada is loaded before executing callback
+    function ensureAdaLoaded(callback) {
+        let adaLoaded = false;
+
+        const checkInterval = setInterval(() => {
+            if (window.adaEmbed && typeof window.adaEmbed.toggle === "function") {
+                adaLoaded = true;
+                clearInterval(checkInterval);
+                callback();
+            }
+        }, 100);
+
+        // Timeout after configured time
+        setTimeout(() => {
+            if (!adaLoaded) {
+                clearInterval(checkInterval);
+                console.warn('[Ada Re-engagement] Ada Embed did not load within timeout');
+            }
+        }, CONFIG.adaLoadTimeout);
+    }
+
+    // Auto-open chat widget
+    function autoOpenChat() {
+        ensureAdaLoaded(() => {
+            console.log('[Ada Re-engagement] Auto-opening chat widget');
+            if (window.adaEmbed && typeof window.adaEmbed.toggle === "function") {
+                window.adaEmbed.toggle();
+            }
+        });
+    }
+
     // Reset inactivity timer
     function resetInactivityTimer() {
         if (firstPopupShown && secondPopupShown) {
@@ -287,7 +320,14 @@
         });
 
         console.log('[Ada Re-engagement] Ada integration initialized');
+
+        // Start inactivity timer
         resetInactivityTimer();
+
+        // Auto-open chat after delay
+        setTimeout(() => {
+            autoOpenChat();
+        }, CONFIG.autoOpenDelay);
     }
 
     // Setup button handlers
