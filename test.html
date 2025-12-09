@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #f9f9f9;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        button {
+            background-color: #1976d2;
+            color: #fff;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+            button:hover {
+                background-color: #1565c0;
+            }
+
+        #output {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #444;
+        }
+    </style>
+    <script src="gtm-release-package.js"></script>
+</head>
+<body>
+    <h1>Test Page</h1>
+    <button id="testButton">Click Me</button>
+    <div id="output"></div>
+    <script>document.getElementById('testButton').onclick = function() {
+            document.getElementById('output').textContent = 'Button clicked!';
+        };</script>
+</body>
+</html>
