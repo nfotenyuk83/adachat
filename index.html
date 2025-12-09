@@ -146,9 +146,83 @@
         let statusElement;
         let customPopup;
 
+        // Get browser language
+        function getBrowserLanguage() {
+            if (Array.isArray(navigator.languages) && navigator.languages.length > 0) {
+                return navigator.languages[0];
+            }
+            return navigator.language || navigator.userLanguage || 'en';
+        }
+        const lang = getBrowserLanguage();
+        const langCode = getBrowserLanguage().split('-')[0].toLowerCase(); // "en", "fr", "de"
+
+        // Translations
+        const translations = {
+            fr: {
+                firstPopup: {
+                    message: "👋 Toujours là ? Votre check-up PC gratuit vous attend !",
+                    button1: "Commencer maintenant",
+                    button2: "Non, merci"
+                },
+                secondPopup: {
+                    message: "👋 Je serai disponible si vous avez besoin d'aide pour l'installation ou l'activation de votre produit.",
+                    button1: "Commencer maintenant",
+                    button2: "Non, merci"
+                }
+            },
+            en: {
+                firstPopup: {
+                    message: "👋 Still there? Your free PC check-up is waiting!",
+                    button1: "Start now",
+                    button2: "No, thanks"
+                },
+                secondPopup: {
+                    message: "👋 I will be available if you need help with your product installation or activation.",
+                    button1: "Start now",
+                    button2: "No, thanks"
+                }
+            },
+            de: {
+                firstPopup: {
+                    message: "👋 Noch da? Ihr kostenloser PC-Check wartet!",
+                    button1: "Jetzt starten",
+                    button2: "Nein, danke"
+                },
+                secondPopup: {
+                    message: "👋 Ich stehe Ihnen gern zur Verfügung, falls Sie Hilfe bei der Installation oder Aktivierung Ihres Produkts benötigen.",
+                    button1: "Jetzt starten",
+                    button2: "Nein, danke"
+                }
+            }
+        };
+
+        // Get current language translations (fallback to English)
+        const currentLang = translations[langCode] || translations['en'];
+
+        // Function to update popup content
+        function updatePopupContent(isFirstPopup) {
+            const content = isFirstPopup ? currentLang.firstPopup : currentLang.secondPopup;
+
+            const popupTitle = document.querySelector('#customPopup h3');
+            const button1 = document.getElementById('needHelp');
+            const button2 = document.getElementById('foundAnswer');
+
+            if (popupTitle) {
+                popupTitle.innerHTML = content.message;
+            }
+            if (button1) {
+                button1.textContent = content.button1;
+            }
+            if (button2) {
+                button2.textContent = content.button2;
+            }
+        }
+
         // Function to show custom popup
         function showCustomPopup() {
             if (customPopup) {
+                // Update content based on which popup this is
+                updatePopupContent(!secondPopupShown);
                 customPopup.classList.add('show');
             }
         }
