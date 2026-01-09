@@ -56,6 +56,18 @@
                 button1: "Jetzt starten",
                 button2: "Nein, danke"
             }
+        },
+        it: {
+            firstPopup: {
+                message: "👋 Sei ancora lì? Il tuo controllo gratuito del PC ti aspetta!",
+                button1: "Inizia ora",
+                button2: "No, grazie"
+            },
+            secondPopup: {
+                message: "👋 Sarò disponibile se hai bisogno di aiuto con l’installazione o l’attivazione del tuo prodotto.",
+                button1: "Inizia ora",
+                button2: "No, grazie"
+            }
         }
     };
     
